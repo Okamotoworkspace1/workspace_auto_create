@@ -1,0 +1,89 @@
+# バスケ雑学ch 素材カタログ
+#
+# 列: ID	ラベル	タグ	年	種別	ライセンス	継承	URL	確認	メモ
+#
+# 継承 = CC の ShareAlike。「あり」は動画側にも継承が及び得るので、収益化方針と要相談。
+# 確認 = ファイルページを開いて著作者名・ライセンス・現存を確かめたか。
+#        この一覧は検索結果から作っており、原本を開けていないので初期値は「未」。
+#        使う前に「済」にしてから公開すること。
+#
+# 探すとき: python3 catalog.py ロッドマン        タグ・ラベルの部分一致
+#           python3 catalog.py --no-sa           継承なしだけ（収益化向き）
+#           python3 catalog.py --kind 動画
+
+ID	ラベル	タグ	年	種別	ライセンス	継承	URL	確認	メモ
+
+# ============================================================
+# 継承なし（PD / CC0）— 収益化チャンネルではここから選ぶ
+# ============================================================
+bulls96-wh-1	1996年優勝ブルズ ホワイトハウス訪問	ブルズ,1996,ジョーダン,ロッドマン,ピッペン,ジャクソン,集合,人物	1997	写真	PD-USGov（要確認）	なし	https://commons.wikimedia.org/wiki/File:1996_Chicago_Bulls_with_Bill_Clinton.jpg	未	★優勝メンバーが一枚に収まる唯一級の自由素材。ep02 本命
+bulls96-wh-2	同 2 枚目	ブルズ,1996,集合,人物	1997	写真	PD-USGov（要確認）	なし	https://commons.wikimedia.org/wiki/File:1996_Chicago_Bulls_with_Bill_Clinton_2.jpg	未	1 枚目と同じ機会の別カット
+bulls96-wh-video	クリントンと1996年優勝ブルズ（映像）	ブルズ,1996,映像,集合	1997	動画	Public Domain Mark 1.0（要確認）	なし	https://commons.wikimedia.org/wiki/File:Pres._Clinton_%26_the_Chicago_Bulls_(1997).webm	未	★自由に使える唯一級の「動く1996年ブルズ」。webm
+finals96-g6-report	1996ファイナル 第6戦 公式スコアラーズレポート	ブルズ,1996,ファイナル,記録,文書	1996	文書	要確認	要確認	https://commons.wikimedia.org/wiki/File:Official_Scorer%27s_Report_-_Game_6_of_1996_NBA_Finals.pdf	未	★当日のボックススコア。落ちに強い一次資料
+sonics96-playoffs	1996プレーオフ ソニックス戦	ソニックス,1996,プレーオフ,ペイトン,試合	1996	写真	要確認	要確認	https://commons.wikimedia.org/wiki/Category:Gary_Payton	未	カテゴリ内「Opening game of 1996 NBA Playoffs…April 26, 1996」を参照
+
+# ============================================================
+# 継承あり（CC BY-SA）— 使うなら動画側のライセンス方針を決めてから
+# ============================================================
+jordan-1987-dunk	ジョーダン 舌出しダンク	ジョーダン,ブルズ,1980年代,人物,ダンク	1987	写真	CC BY-SA 3.0	あり	https://commons.wikimedia.org/wiki/File:Jordan_by_Lipofsky_16577.jpg	未	撮影 Steve Lipofsky。象徴的な一枚
+jordan-1997-ft	ジョーダン フリースローライン	ジョーダン,ブルズ,1990年代,人物	1997	写真	CC BY-SA 3.0	あり	https://commons.wikimedia.org/wiki/File:Jordan_Lipofsky.jpg	未	撮影 Steve Lipofsky。1996年と同世代のユニフォーム
+jordan-1997-alt	ジョーダン 1997（別カット）	ジョーダン,ブルズ,1990年代,人物	1997	写真	CC BY-SA 3.0	あり	https://commons.wikimedia.org/wiki/File:Steve_Lipfosky_--_Michael_Jordan_(1997).jpg	未	撮影 Steve Lipofsky
+jordan-misc	ジョーダン（その他）	ジョーダン,人物	不明	写真	CC BY-SA 2.0	あり	https://commons.wikimedia.org/wiki/File:Michael_Jordan.jpg	未	年代・所属を要確認
+pippen-lipofsky	ピッペン	ピッペン,ブルズ,1990年代,人物	不明	写真	CC BY-SA（要確認）	あり	https://commons.wikimedia.org/wiki/File:Lipofsky_Pippen.jpg	未	撮影 Steve Lipofsky
+pippen-headshot	ピッペン 顔写真	ピッペン,人物	不明	写真	要確認	要確認	https://commons.wikimedia.org/wiki/File:Scottie_Pippen_headshot.jpg	未	
+rodman-topo	ロッドマン	ロッドマン,人物	不明	写真	CC BY-SA 1.0	あり	https://commons.wikimedia.org/wiki/File:Dennis_Rodman_ToPo.jpg	未	CC 1.0 は珍しい。条項を要確認
+rodman-2001	ロッドマン 2001	ロッドマン,人物,2000年代	2001	写真	要確認	要確認	https://commons.wikimedia.org/wiki/File:Dennis_Rodman,_2001.jpg	未	ブルズ在籍後。1996年の文脈には使えない
+rodman-2017	ロッドマン 2017	ロッドマン,人物,2010年代	2017	写真	CC BY-SA 2.0	あり	https://commons.wikimedia.org/wiki/File:Dennis_Rodman_01_(34679281591).jpg	未	引退後。1996年の文脈には使えない
+rodman-cc	ロッドマン（CC）	ロッドマン,人物	不明	写真	CC BY-SA 3.0	あり	https://commons.wikimedia.org/wiki/File:Dennis_CC_8671.JPG	未	年代を要確認
+bulls-nets-1991	ブルズ 対 ネッツ 1991	ブルズ,1990年代,試合,会場	1991	写真	要確認	要確認	https://commons.wikimedia.org/wiki/File:Chicago_Bulls_-_New_Jersey_Nets_match_on_March_28,_1991.jpg	未	ジョーダン期の試合の画。引きの絵に使える
+united-center	ユナイテッド・センター 外観	会場,シカゴ,ブルズ	不明	写真	CC BY-SA 2.5	あり	https://commons.wikimedia.org/wiki/File:United_Center,_Chicago.JPG	未	ブルズ本拠地。ホーム39勝2敗の下地に
+curry-201516	カリー 2015-16シーズン	カリー,ウォリアーズ,2010年代,人物	2016	写真	CC BY-SA 2.0	あり	https://commons.wikimedia.org/wiki/File:Stephen_Curry_(24180454343).jpg	未	73勝シーズン本人。ep02 の比較カットに最適
+curry-2016-dribble	カリー ドリブル 2016	カリー,ウォリアーズ,人物	2016	写真	CC BY-SA 2.0	あり	https://commons.wikimedia.org/wiki/File:Stephen_Curry_dribbling_2016.jpg	未	
+curry-2016-wsh	カリー 対ワシントン 2016	カリー,ウォリアーズ,人物,試合	2016	写真	CC BY-SA 2.0	あり	https://commons.wikimedia.org/wiki/File:Stephen_Curry_vs_Washington_2016.jpg	未	
+phil-jackson	フィル・ジャクソン	ジャクソン,監督,人物	不明	写真	要確認	要確認	https://commons.wikimedia.org/wiki/File:Phil_Jackson_3_cropped.jpg	未	年代を要確認
+
+# ============================================================
+# ep01（ピストル・ピート）— 既存回の素材。古い写真は PD の可能性あり
+# ============================================================
+maravich-1967	マラビッチ 1967	マラビッチ,1960年代,人物,大学	1967	写真	要確認	要確認	https://commons.wikimedia.org/wiki/File:Pete_Maravich_1967.jpeg	未	LSU 時代。PD 主張の根拠を要確認
+maravich-1970	ピストル・ピート 1970	マラビッチ,1970年代,人物,ホークス	1970	写真	要確認	要確認	https://commons.wikimedia.org/wiki/File:PIstol_Pete_Maravich_1970.jpg	未	NBA デビュー年。ep01 本命
+maravich-1970-crop	マラビッチ 1970（トリミング）	マラビッチ,1970年代,人物	1970	写真	要確認	要確認	https://commons.wikimedia.org/wiki/File:Pete_maravich_1970_cropped.jpg	未	縦型に寄せやすい
+maravich-1977	マラビッチ 1977	マラビッチ,1970年代,人物,ジャズ	1977	写真	要確認	要確認	https://commons.wikimedia.org/wiki/File:Pete_Maravich_1977.jpeg	未	ジャズ時代
+maravich-guerin-1970	マラビッチとゲリン 1970	マラビッチ,ホークス,1970年代,人物	1970	写真	要確認	要確認	https://commons.wikimedia.org/wiki/File:Guerin_and_maravich_hawks_1970.jpg	未	監督との 2 ショット
+maravich-vanarsdale	マラビッチとヴァンアースデール	マラビッチ,人物	不明	写真	要確認	要確認	https://commons.wikimedia.org/wiki/File:Tom_Van_Arsdale_and_Pete_Maravich.jpeg	未	
+maravich-arena	ピート・マラビッチ・アセンブリーセンター	マラビッチ,会場	不明	写真	要確認	要確認	https://commons.wikimedia.org/wiki/File:Pete_Maravich_Assembly_Center_(Baton_Rouge,_Louisiana).jpg	未	LSU の体育館。彼の名が付いている
+
+# ============================================================
+# ロゴ — 商標。ライセンス表記が緩くても使用は慎重に
+# ============================================================
+bulls-logo	シカゴ・ブルズ ロゴ	ブルズ,ロゴ,商標	—	ロゴ	商標	—	https://commons.wikimedia.org/wiki/File:Chicago_Bulls_logo.svg	未	サムネイルでの使用は避ける
+bulls-wordmark	シカゴ・ブルズ ワードマーク	ブルズ,ロゴ,商標	—	ロゴ	商標	—	https://commons.wikimedia.org/wiki/File:Chicago_Bulls_wordmark.gif	未	同上
+united-center-logo	ユナイテッド・センター ロゴ	会場,ロゴ,商標	—	ロゴ	商標	—	https://commons.wikimedia.org/wiki/File:United_Center_Logo.svg	未	同上
+
+# ============================================================
+# 探索の起点（カテゴリ）— 個別ファイルはここから掘る
+# ============================================================
+cat-bulls	カテゴリ: シカゴ・ブルズ	ブルズ,カテゴリ	—	カテゴリ	—	—	https://commons.wikimedia.org/wiki/Category:Chicago_Bulls	—	約40ファイル
+cat-bulls-players	カテゴリ: ブルズの選手	ブルズ,カテゴリ,人物	—	カテゴリ	—	—	https://commons.wikimedia.org/wiki/Category:Chicago_Bulls_players	—	約30ファイル
+cat-nba-9596	カテゴリ: 1995-96 NBAシーズン	1996,カテゴリ	—	カテゴリ	—	—	https://commons.wikimedia.org/wiki/Category:1995%E2%80%9396_NBA_season	—	★ep02 はまずここを掘る
+cat-rodman	カテゴリ: デニス・ロッドマン	ロッドマン,カテゴリ	—	カテゴリ	—	—	https://commons.wikimedia.org/wiki/Category:Dennis_Rodman	—	
+cat-pippen	カテゴリ: スコッティ・ピッペン	ピッペン,カテゴリ	—	カテゴリ	—	—	https://commons.wikimedia.org/wiki/Category:Scottie_Pippen	—	1989年・1992年のものがある
+cat-maravich	カテゴリ: ピート・マラビッチ	マラビッチ,カテゴリ	—	カテゴリ	—	—	https://commons.wikimedia.org/wiki/Category:Pete_Maravich	—	10ファイル
+cat-payton	カテゴリ: ゲイリー・ペイトン	ペイトン,ソニックス,カテゴリ	—	カテゴリ	—	—	https://commons.wikimedia.org/wiki/Category:Gary_Payton	—	1996年プレーオフの写真あり
+cat-kemp	カテゴリ: ショーン・ケンプ	ケンプ,ソニックス,カテゴリ	—	カテゴリ	—	—	https://commons.wikimedia.org/wiki/Category:Shawn_Kemp	—	
+cat-clinton97	カテゴリ: ビル・クリントン 1997	1996,ブルズ,カテゴリ	—	カテゴリ	—	—	https://commons.wikimedia.org/wiki/Category:Bill_Clinton_in_1997	—	ホワイトハウス訪問の写真はここ
+
+# ============================================================
+# 汎用 b-roll — 選手は写らないが継承なしでつなぎに使える
+# ============================================================
+stock-pexels	Pexels バスケットボール動画	b-roll,動画,汎用	—	素材サイト	Pexels ライセンス	なし	https://www.pexels.com/search/videos/basketball/	—	帰属不要・商用可
+stock-pixabay	Pixabay バスケットボール動画	b-roll,動画,汎用	—	素材サイト	Pixabay ライセンス	なし	https://pixabay.com/videos/search/basketball/	—	帰属不要・商用可
+
+# ============================================================
+# 自作 — 探してこられないものだけ（数字の図解）
+# ============================================================
+fig-ep02-hook	ep02 ヒーロー数字 72勝10敗	ep02,図解,自作	—	図解	自作	なし	ep02_short/01_hook.svg	済	make_ep02_short.py
+fig-ep02-regular	ep02 レギュラーシーズン 72対73	ep02,図解,自作	—	図解	自作	なし	ep02_short/02_regular-season.svg	済	同上
+fig-ep02-wins	ep02 通年 87-13 と 88-18	ep02,図解,自作	—	図解	自作	なし	ep02_short/05a_season-wins.svg	済	同上
+fig-ep02-losses	ep02 敗戦を強調	ep02,図解,自作	—	図解	自作	なし	ep02_short/05b_season-losses.svg	済	05a と同座標
+fig-safe-area	ショート セーフエリア ガイド	ガイド,自作	—	図解	自作	なし	ep02_short/00_safe-area.svg	済	書き出しには乗せない
