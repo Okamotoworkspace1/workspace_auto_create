@@ -19,7 +19,7 @@ paragraph_pause = 0.7
 chapter_pause = 1.0
 
 [lexicon]
-paths = ["lexicon/nba.tsv"]
+paths = ["lexicon/nba.tsv", "lexicon/ep02.tsv"]
 
 [engines.aivisspeech]
 base_url = "http://127.0.0.1:10101"
