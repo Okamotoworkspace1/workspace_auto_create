@@ -1,0 +1,62 @@
+# キーワード → 素材ID の既定割り当て
+#
+# 台本にこの語が出たら、この素材を当てる。storyboard.py が使う。
+# 長いキーワードが優先される（「72勝10敗」は「ブルズ」に勝つ）。
+#
+# 方針: まず埋めることを優先する。年代・権利の精査は後工程。
+#       合わないと分かったら素材ID を差し替えるだけでよい。
+#
+# キーワード	素材ID	メモ
+
+# --- 人物 ---
+マイケル・ジョーダン	jordan-1997-ft	
+ジョーダン	jordan-1997-ft	MJ の既定
+デニス・ロッドマン	bulls96-wh-1	引退後の写真しかないので集合写真から抜く
+ロッドマン	bulls96-wh-1	
+スコッティ・ピッペン	pippen-lipofsky	
+ピッペン	pippen-lipofsky	
+フィル・ジャクソン	phil-jackson	
+スティーブ・カー	bulls96-wh-1	単独写真が無いので集合写真
+トニー・クーコッチ	bulls96-wh-1	同上
+ロン・ハーパー	bulls96-wh-1	同上
+カリー	curry-201516	
+ゲイリー・ペイトン	cat-payton	要差し替え
+ペイトン	cat-payton	要差し替え
+ショーン・ケンプ	cat-kemp	要差し替え
+マラビッチ	maravich-1970	ep01
+ピストル・ピート	maravich-1970	ep01
+
+# --- チーム・会場 ---
+シカゴ・ブルズ	bulls96-wh-1	
+ブルズ	bulls96-wh-1	
+ウォリアーズ	curry-201516	
+ゴールデンステート	curry-201516	
+オーランド・マジック	jordan-1997-ft	専用素材なし
+オーランド	jordan-1997-ft	
+デトロイト・ピストンズ	bulls-nets-1991	専用素材なし
+シアトル・スーパーソニックス	sonics96-playoffs	
+ソニックス	sonics96-playoffs	
+ユナイテッド・センター	united-center	
+シカゴ	united-center	
+ホーム	united-center	
+
+# --- 場面 ---
+ファイナル	finals96-g6-report	
+プレーオフ	finals96-g6-report	
+優勝	bulls96-wh-video	
+レギュラー背番号	jordan-1987-dunk	
+野球	jordan-1997-ft	
+審判	rodman-topo	
+監督	phil-jackson	
+トライアングル・オフェンス	bulls-nets-1991	
+リバウンド	rodman-topo	
+父	bulls96-wh-video	
+ファーザーズデー	bulls96-wh-video	
+
+# --- つなぎ（受け皿に落ちていた区間を拾う）---
+最強	bulls96-wh-video	落ち
+1996年	bulls96-wh-1	
+2016年	curry-201516	
+
+# --- 受け皿（どれにも当たらなかったとき）---
+*	stock-pexels	fallback
