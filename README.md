@@ -35,10 +35,42 @@ ElevenLabs のようなクラウドサービスまで、同じ台本のままエ
 
 ## クイックスタート
 
-```bash
-git clone <このリポジトリ> && cd jigoe
-pip install -e .
+**Python 3.11 以上が必要です**（`tomllib` を使うため）。まず確認してください。
 
+```bash
+python3 --version
+```
+
+3.11 未満、または `command not found` なら先に Python を入れます。
+macOS に最初から入っている Python は 3.9 系のことが多く、そのままでは動きません。
+
+```bash
+brew install python@3.12          # Homebrew の場合
+# または https://www.python.org/downloads/ の公式インストーラ
+```
+
+インストール:
+
+```bash
+git clone <このリポジトリ> && cd workspace_auto_create
+
+python3 -m venv .venv             # 仮想環境を作る（システムの Python を汚さない）
+source .venv/bin/activate         # Windows は .venv\Scripts\activate
+python3 -m pip install -e .
+```
+
+> `pip: command not found` と出る場合は `python3 -m pip` を使ってください。
+> `externally-managed-environment` というエラーが出る場合は、上の仮想環境を作る手順を飛ばしています。
+
+仮想環境を有効にしなくても `jigoe` を使えるようにするには、エイリアスを登録します。
+
+```bash
+echo "alias jigoe='$PWD/.venv/bin/jigoe'" >> ~/.zshrc && source ~/.zshrc
+```
+
+動作確認:
+
+```bash
 mkdir ~/my-channel && cd ~/my-channel
 jigoe init --name "バスケ雑学ch"     # jigoe.toml / 台本 / 読み辞書の雛形を作る
 
@@ -242,7 +274,7 @@ output_format = "pcm_24000"          # 連結のため mp3 ではなく pcm を�
 
 ## 開発
 
-必須依存はありません。標準ライブラリだけで動きます
+Python 3.11 以上。必須依存はありません。標準ライブラリだけで動きます
 （`requests` があれば HTTP に使いますが、無ければ `urllib` にフォールバックします）。
 
 ```bash

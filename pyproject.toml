@@ -7,7 +7,8 @@ name = "jigoe"
 version = "0.1.0"
 description = "自分の声のクローンで台本を読み上げる、動画ナレーション向け合成音声ツール"
 readme = "README.md"
-requires-python = ">=3.10"
+# tomllib（標準ライブラリ）を使うため 3.11 以上が必要
+requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "jigoe contributors" }]
 keywords = ["tts", "voice-clone", "japanese", "youtube", "narration"]
