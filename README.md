@@ -221,7 +221,8 @@ jigoe がこの 2 つを機能として持っているのはそのためです
 （読み辞書＋誤読チェック、`[[0.8]]` 記法）。
 
 台本の事実確認、画像の著作権処理、独自性の注入は、このツールの範囲外です。
-詳しくは [docs/workflow.md](docs/workflow.md) を参照してください。
+詳しくは [docs/workflow.md](docs/workflow.md)、素材を集める手順は
+[docs/assets.md](docs/assets.md) を参照してください。
 
 ---
 
