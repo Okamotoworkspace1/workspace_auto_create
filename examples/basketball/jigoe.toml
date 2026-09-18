@@ -1,0 +1,32 @@
+# バスケ雑学チャンネルの設定例
+# engine を実際に使うものへ切り替えてから jigoe doctor を実行してください。
+
+[project]
+name = "バスケ雑学ch"
+out_dir = "out"
+
+[voice]
+engine = "mock"        # → aivisspeech / sbv2 / gptsovits / elevenlabs / fishaudio
+speed = 1.0
+
+[audio]
+sample_rate = 44100
+peak_dbfs = -1.5
+lead_silence = 0.3
+tail_silence = 0.6
+sentence_pause = 0.35
+paragraph_pause = 0.7
+chapter_pause = 1.0
+
+[lexicon]
+paths = ["lexicon/nba.tsv"]
+
+[engines.aivisspeech]
+base_url = "http://127.0.0.1:10101"
+speaker = 888753760
+
+[engines.elevenlabs]
+api_key_env = "ELEVENLABS_API_KEY"
+voice_id = ""
+model_id = "eleven_multilingual_v2"
+output_format = "pcm_24000"

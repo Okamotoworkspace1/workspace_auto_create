@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.venv/
+
+# jigoe の生成物
+out/
+.jigoe-cache/
+*.wav
+!examples/**/refs/*.wav
