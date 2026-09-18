@@ -14,3 +14,6 @@ out/
 
 # 収録原稿のダウンロードキャッシュ
 examples/recording/.corpus/
+
+# ダウンロードした素材（実体はリポジトリに入れない）
+examples/basketball/assets/downloads/
