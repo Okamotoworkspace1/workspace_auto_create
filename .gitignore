@@ -11,3 +11,6 @@ out/
 .jigoe-cache/
 *.wav
 !examples/**/refs/*.wav
+
+# 収録原稿のダウンロードキャッシュ
+examples/recording/.corpus/
