@@ -17,6 +17,16 @@ AivisSpeech は Style-Bert-VITS2 を VOICEVOX と同じ操作感の GUI にま�
 ソフト本体は無料（LGPL-3.0）、商用利用可。**自分で作った声モデルは自分が権利者**なので、
 ライセンス面で悩むところがありません。
 
+| | URL |
+|---|---|
+| 公式サイト | <https://aivis-project.com/> |
+| AivisSpeech（ダウンロード） | <https://aivis-project.com/speech/> |
+| AIVM Generator（モデル変換） | <https://aivm-generator.aivis-project.com/> |
+| AivisHub（モデル共有） | <https://hub.aivis-project.com/> |
+| GitHub（本体 / エンジン） | <https://github.com/Aivis-Project/AivisSpeech> / <https://github.com/Aivis-Project/AivisSpeech-Engine> |
+
+対応 OS は Windows 10（22H2 以降）・Windows 11・macOS 13 Ventura 以降です。
+
 ### 1. 収録
 
 1. ITA コーパス（標準文の文集、数百文）を用意する
@@ -32,8 +42,13 @@ Google Colab の無料 GPU で Style-Bert-VITS2 を学習させます（数時�
 
 ### 3. モデル化と読み込み
 
-AIVM-Generator で `.aivmx` に変換し、AivisSpeech に読み込ませます。
-合成そのものは CPU でも動きます。
+学習した Style-Bert-VITS2 モデルを `.onnx` にしたうえで、
+[AIVM Generator](https://aivm-generator.aivis-project.com/)（ブラウザ上で動きます）で
+`.aivmx` に変換し、AivisSpeech に読み込ませます。合成そのものは CPU でも動きます。
+
+> `.aivm` は GPU 向け、`.aivmx` は CPU 向けです。ナレーション用途なら `.aivmx` で十分です。
+> 手順の詳細は Aivis Project 公式の解説記事
+> <https://note.com/aivis_project/n/nd689f3f45dae> が最新です。
 
 ### 4. jigoe から使う
 
@@ -64,6 +79,7 @@ jigoe say "テストです。" -o test.wav
 ## B. Style-Bert-VITS2 を直接使う
 
 AivisSpeech の GUI を挟まず、学習・スタイル指定まで自分で触りたい場合。
+リポジトリは <https://github.com/litagin02/Style-Bert-VITS2> です。
 `server_fastapi.py` を起動しておきます。
 
 ```toml
@@ -85,6 +101,7 @@ style_weight = 1.0
 ## C. GPT-SoVITS でゼロショット（いちばん速い）
 
 学習させずに、参照音声 5〜15 秒だけで声質を再現します。まず試すには最短です。
+リポジトリは <https://github.com/RVC-Boss/GPT-SoVITS> です。
 `api_v2.py` を起動しておきます。
 
 ```toml
