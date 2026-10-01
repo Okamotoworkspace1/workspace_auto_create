@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""YouTube の URL を貼るだけで MP4（動画）か MP3（音声）に保存する Mac 向けツール。
+"""YouTube の URL を貼るだけで MP4（動画）か MP3（音声）に保存するツール（Mac / Windows）。
 
 ブラウザで開く操作画面（標準ライブラリの http.server）と、ターミナルから直接
 使う CLI の両方を備える。実際のダウンロードは yt-dlp、変換・結合は ffmpeg に任せる。
@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import html
 import json
 import os
@@ -45,11 +46,20 @@ except ImportError:  # pragma: no cover - 起動スクリプトが入れるは�
     )
 
 IS_MAC = sys.platform == "darwin"
+IS_WIN = sys.platform == "win32"
 DEFAULT_DIR = Path.home() / "Downloads" / "YouTube"
 if IS_MAC:
     SUPPORT_DIR = Path.home() / "Library" / "Application Support" / "YouTubeDownloader"
+elif IS_WIN:
+    SUPPORT_DIR = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local")) / "YouTubeDownloader"
 else:
     SUPPORT_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "youtube-downloader"
+# Windows のインストーラーは ffmpeg をここに置く。PATH を通さずに使えるようにする
+BUNDLED_FFMPEG = SUPPORT_DIR / "ffmpeg"
+if BUNDLED_FFMPEG.is_dir():
+    os.environ["PATH"] = str(BUNDLED_FFMPEG) + os.pathsep + os.environ.get("PATH", "")
+# Windows で子プロセス（PowerShell など）を起動したときに黒い窓を出さない
+NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 PREFERRED_PORT = 8765
 MAX_BODY = 256 * 1024
 HISTORY_LIMIT = 100
@@ -86,8 +96,8 @@ FRIENDLY_ERRORS = [
      "まだ公開・配信が始まっていない動画です。"),
     (("Video unavailable", "This video has been removed", "This video is not available", "Incomplete YouTube ID"),
      "動画が見つかりません（削除・非公開・URL の間違いの可能性があります）。"),
-    (("No space left",), "Mac の空き容量が足りません。"),
-    (("Permission denied", "Operation not permitted", "Read-only file system"),
+    (("No space left", "There is not enough space"), "ディスクの空き容量が足りません。"),
+    (("Permission denied", "Operation not permitted", "Read-only file system", "Access is denied"),
      "保存先フォルダに書き込めません。保存先を変更してください。"),
     (("urlopen error", "timed out", "Temporary failure in name resolution", "nodename nor servname",
       "Connection reset", "Network is unreachable", "Failed to resolve"),
@@ -194,6 +204,8 @@ def build_options(fmt: str, quality: str, work_dir: Path, hook=None) -> dict:
 
 def check_ffmpeg() -> None:
     if shutil.which("ffmpeg") is None:
+        if IS_WIN:
+            raise DownloadError("ffmpeg が見つかりません。インストーラーをもう一度実行してください。")
         raise DownloadError(
             "ffmpeg が見つかりません。ターミナルで `brew install ffmpeg` を実行してください。"
         )
@@ -261,7 +273,7 @@ def unique_path(path: Path) -> Path:
 
 
 # --------------------------------------------------------------------------
-# Mac との連携（通知・フォルダ選択・Finder）
+# OS との連携（通知・フォルダ選択・Finder / エクスプローラー）
 # --------------------------------------------------------------------------
 
 
@@ -277,7 +289,57 @@ def osascript(lines: list[str], *args: str, timeout: float | None = 10) -> subpr
         return None
 
 
+def powershell(script: str, env: dict[str, str] | None = None, sta: bool = False,
+               timeout: float | None = 15) -> subprocess.CompletedProcess | None:
+    """Windows で PowerShell を窓なしで動かす。文字列は環境変数で渡す（埋め込むと引用符でこわれるため）。"""
+    if not IS_WIN:
+        return None
+    # 日本語を含むスクリプトを確実に渡すため UTF-16 の Base64 にする
+    encoded = base64.b64encode(
+        ("[Console]::OutputEncoding = [Text.Encoding]::UTF8\n" + script).encode("utf-16-le")
+    ).decode()
+    cmd = ["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass"]
+    if sta:
+        cmd.append("-STA")
+    try:
+        return subprocess.run(
+            [*cmd, "-EncodedCommand", encoded], capture_output=True, timeout=timeout,
+            env={**os.environ, **(env or {})}, creationflags=NO_WINDOW,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+
+WIN_TOAST = r"""
+[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null
+[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] > $null
+$x = New-Object Windows.Data.Xml.Dom.XmlDocument
+$x.LoadXml('<toast><visual><binding template="ToastGeneric"><text></text><text></text></binding></visual></toast>')
+$t = $x.GetElementsByTagName('text')
+$t.Item(0).AppendChild($x.CreateTextNode($env:YTDL_TITLE)) > $null
+$t.Item(1).AppendChild($x.CreateTextNode($env:YTDL_MESSAGE)) > $null
+$id = '{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe'
+[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($id).Show(
+  [Windows.UI.Notifications.ToastNotification]::new($x))
+"""
+
+WIN_CHOOSE_FOLDER = r"""
+Add-Type -AssemblyName System.Windows.Forms
+$d = New-Object System.Windows.Forms.FolderBrowserDialog
+$d.Description = '保存先のフォルダを選んでください'
+$d.ShowNewFolderButton = $true
+if (Test-Path -LiteralPath $env:YTDL_DIR) { $d.SelectedPath = $env:YTDL_DIR }
+# ブラウザの裏に隠れないよう、最前面の見えない窓を親にする
+$owner = New-Object System.Windows.Forms.Form -Property @{ TopMost = $true; ShowInTaskbar = $false }
+if ($d.ShowDialog($owner) -eq [System.Windows.Forms.DialogResult]::OK) { [Console]::Out.Write($d.SelectedPath) }
+"""
+
+
 def notify(title: str, message: str, sound: bool = True) -> None:
+    if IS_WIN:
+        env = {"YTDL_TITLE": title, "YTDL_MESSAGE": message[:200]}
+        threading.Thread(target=powershell, args=(WIN_TOAST, env), daemon=True).start()
+        return
     # 文字列は引数で渡す（AppleScript に埋め込むと引用符でこわれるため）
     script = ["on run argv", "display notification (item 2 of argv) with title (item 1 of argv)"
               + (' sound name "Glass"' if sound else ""), "end run"]
@@ -285,6 +347,10 @@ def notify(title: str, message: str, sound: bool = True) -> None:
 
 
 def choose_folder(current: Path) -> Path | None:
+    if IS_WIN:
+        res = powershell(WIN_CHOOSE_FOLDER, {"YTDL_DIR": str(current)}, sta=True, timeout=None)
+        out = res.stdout.decode("utf-8", "replace").strip() if res is not None else ""
+        return Path(out) if out else None
     script = [
         "on run argv",
         'set p to "保存先のフォルダを選んでください"',
@@ -306,6 +372,13 @@ def choose_folder(current: Path) -> Path | None:
 
 
 def open_path(path: Path, reveal: bool = False) -> None:
+    if IS_WIN:
+        if reveal:
+            # explorer は /select,"パス" を 1 つの引数として受け取る（パスに " は使えない）
+            subprocess.run(f'explorer /select,"{path}"', check=False)
+        else:
+            os.startfile(path)  # type: ignore[attr-defined]  # 既定のアプリで開く
+        return
     if IS_MAC:
         subprocess.run(["open", "-R", str(path)] if reveal else ["open", str(path)], check=False)
     elif shutil.which("xdg-open"):
@@ -322,7 +395,7 @@ DEFAULT_SETTINGS = {
     "q_mp3": "192",
     "out_dir": str(DEFAULT_DIR),
     "auto_start": True,  # 貼り付けたらすぐダウンロード
-    "notify": True,  # 完了したら Mac の通知を出す
+    "notify": True,  # 完了したら OS の通知を出す
 }
 
 
@@ -640,7 +713,19 @@ class App:
 
 
 def render_page(app: App) -> bytes:
-    page = PAGE.replace("{{TOKEN}}", html.escape(app.token)).replace("{{INSTANCE}}", app.instance)
+    if IS_MAC:
+        keys, filer = "<kbd>⌘</kbd> <kbd>V</kbd>", "Finder"
+    elif IS_WIN:
+        keys, filer = "<kbd>Ctrl</kbd> + <kbd>V</kbd>", "エクスプローラー"
+    else:
+        keys, filer = "<kbd>Ctrl</kbd> + <kbd>V</kbd>", "フォルダ"
+    page = (
+        PAGE.replace("{{TOKEN}}", html.escape(app.token))
+        .replace("{{INSTANCE}}", app.instance)
+        .replace("{{PASTE_KEYS}}", keys)
+        .replace("{{PASTE_TEXT}}", "⌘V" if IS_MAC else "Ctrl+V")
+        .replace("{{FILER}}", filer)
+    )
     return page.encode("utf-8")
 
 
@@ -757,6 +842,52 @@ def make_handler(app: App):
             return self._json(404, {"error": "not found"})
 
     return Handler
+
+
+def redirect_output_if_windowless() -> None:
+    """pythonw（窓なし）で起動されたときは出力先が無いので、ログファイルに書く。"""
+    if sys.stdout is not None and sys.stderr is not None:
+        return
+    log = SUPPORT_DIR / "app.log"
+    try:
+        log.parent.mkdir(parents=True, exist_ok=True)
+        if log.exists() and log.stat().st_size > 1_000_000:
+            log.unlink()
+        f = open(log, "a", encoding="utf-8", buffering=1)  # noqa: SIM115 - 終了まで開いたまま
+    except OSError:
+        return
+    sys.stdout = sys.stderr = f
+
+
+def update_ytdlp_in_background() -> None:
+    """yt-dlp を 1 日 1 回、裏で最新にする（反映されるのは次に起動したとき）。
+
+    YouTube の仕様変更に合わせて頻繁に直るため。Mac では launcher.sh が同じことをする。
+    """
+    stamp = SUPPORT_DIR / ".updated"
+    try:
+        if time.time() - stamp.stat().st_mtime < 24 * 3600:
+            return
+    except OSError:
+        pass
+    exe = Path(sys.executable)
+    if exe.name.lower() == "pythonw.exe" and (exe.parent / "python.exe").exists():
+        exe = exe.parent / "python.exe"
+
+    def run() -> None:
+        cmd = [str(exe), "-m", "pip", "install", "-q", "-U", "--disable-pip-version-check",
+               "--no-warn-script-location", "yt-dlp[default,deno]"]
+        try:
+            res = subprocess.run(cmd, capture_output=True, text=True, timeout=600, creationflags=NO_WINDOW)
+        except (OSError, subprocess.TimeoutExpired) as e:
+            print(f"yt-dlp の更新に失敗しました: {e}")
+            return
+        if res.returncode == 0:
+            stamp.touch()
+        else:
+            print(f"yt-dlp の更新に失敗しました:\n{res.stderr[-2000:]}")
+
+    threading.Thread(target=run, daemon=True).start()
 
 
 def find_running() -> str | None:
@@ -959,7 +1090,7 @@ PAGE = r"""<!DOCTYPE html>
 
   <section class="card">
     <form class="drop" id="form">
-      <p class="hint">YouTube の URL を <b>コピーして <kbd>⌘</kbd> <kbd>V</kbd></b>　または　リンクをここへドラッグ</p>
+      <p class="hint">YouTube の URL を <b>コピーして {{PASTE_KEYS}}</b>　または　リンクをここへドラッグ</p>
       <div class="urlrow">
         <input type="text" id="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" spellcheck="false" aria-label="YouTube の URL">
         <button type="button" class="ghost" id="paste">📋 貼り付け</button>
@@ -1001,6 +1132,8 @@ PAGE = r"""<!DOCTYPE html>
 <script>
 const TOKEN = "{{TOKEN}}";
 const INSTANCE = "{{INSTANCE}}";
+const PASTE = "{{PASTE_TEXT}}";
+const FILER = "{{FILER}}";
 const QUALITIES = {
   mp4: [["best", "最高画質"], ["1080", "1080p まで"], ["720", "720p まで"], ["480", "480p まで（軽量）"]],
   mp3: [["192", "192 kbps（標準）"], ["320", "320 kbps（高音質）"], ["128", "128 kbps（軽量）"]],
@@ -1104,7 +1237,7 @@ function handleText(text) {
 
 $("form").addEventListener("submit", (e) => { e.preventDefault(); submit($("url").value); });
 
-// ページのどこで ⌘V しても受け取る
+// ページのどこで ⌘V / Ctrl+V しても受け取る
 document.addEventListener("paste", (e) => {
   const text = e.clipboardData?.getData("text") || "";
   const inInput = e.target === $("url");
@@ -1116,7 +1249,7 @@ document.addEventListener("paste", (e) => {
 
 $("paste").addEventListener("click", async () => {
   try { handleText(await navigator.clipboard.readText()); }
-  catch (_) { toast("クリップボードを読めませんでした。⌘V で貼り付けてください。", "err"); $("url").focus(); }
+  catch (_) { toast(`クリップボードを読めませんでした。${PASTE} で貼り付けてください。`, "err"); $("url").focus(); }
 });
 
 let dragDepth = 0;
@@ -1205,7 +1338,7 @@ function updateCard(c, j) {
   } else if (j.state === "done") {
     c.actions.append(
       button(j.fmt === "mp3" ? "▶︎ 再生" : "▶︎ 再生", "ghost", () => post("/api/open", { id: j.id })),
-      button("Finder で表示", "ghost", () => post("/api/reveal", { id: j.id })),
+      button(`${FILER} で表示`, "ghost", () => post("/api/reveal", { id: j.id })),
       button("✕", "link", () => post("/api/remove", { id: j.id })),
     );
   } else {
@@ -1304,9 +1437,13 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("-o", "--output", type=Path, help=f"保存先（既定 {DEFAULT_DIR}）")
     p.add_argument("--port", type=int, default=0, help="画面モードのポート番号（既定: 自動）")
     p.add_argument("--no-browser", action="store_true", help="画面モードでブラウザを自動で開かない")
+    p.add_argument("--auto-update", action="store_true", help="起動時に yt-dlp を裏で最新にする（1 日 1 回）")
+    redirect_output_if_windowless()
     args = p.parse_args(argv)
 
     if not args.url:
+        if args.auto_update and not find_running():
+            update_ytdlp_in_background()
         serve(args.output, args.port, not args.no_browser)
         return 0
 

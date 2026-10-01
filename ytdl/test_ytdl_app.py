@@ -153,3 +153,26 @@ def test_download_cancel_leaves_no_files(local_video, tmp_path, monkeypatch):
     with pytest.raises(m.Cancelled):
         m.download(local_video, "mp4", "best", tmp_path, hook)
     assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.parametrize("mac, win, keys, filer", [
+    (True, False, "⌘", "Finder"),
+    (False, True, "Ctrl", "エクスプローラー"),
+])
+def test_page_labels_follow_os(monkeypatch, mac, win, keys, filer):
+    monkeypatch.setattr(m, "IS_MAC", mac)
+    monkeypatch.setattr(m, "IS_WIN", win)
+    app = m.App.__new__(m.App)
+    app.token, app.instance = "tok", "abc"
+    page = m.render_page(app).decode()
+    assert "{{" not in page
+    assert f"<kbd>{keys}</kbd>" in page and f'const FILER = "{filer}";' in page
+
+
+def test_update_ytdlp_skips_when_recently_updated(tmp_path, monkeypatch):
+    monkeypatch.setattr(m, "SUPPORT_DIR", tmp_path)
+    (tmp_path / ".updated").touch()
+    called = []
+    monkeypatch.setattr(m.subprocess, "run", lambda *a, **k: called.append(a))
+    m.update_ytdlp_in_background()
+    assert called == []
