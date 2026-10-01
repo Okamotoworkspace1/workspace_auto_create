@@ -174,5 +174,22 @@ def test_update_ytdlp_skips_when_recently_updated(tmp_path, monkeypatch):
     (tmp_path / ".updated").touch()
     called = []
     monkeypatch.setattr(m.subprocess, "run", lambda *a, **k: called.append(a))
-    m.update_ytdlp_in_background()
+    m.update_ytdlp()
     assert called == []
+
+
+def test_update_ytdlp_uses_uv_and_refreshes_stamp(tmp_path, monkeypatch):
+    monkeypatch.setattr(m, "SUPPORT_DIR", tmp_path)
+    (tmp_path / "bin").mkdir()
+    (tmp_path / "bin" / "uv").write_text("")
+    calls = []
+
+    def fake_run(cmd, **kw):
+        calls.append(cmd)
+        return m.subprocess.CompletedProcess(cmd, 0, "", "")
+
+    monkeypatch.setattr(m.subprocess, "run", fake_run)
+    m.update_ytdlp()
+    assert calls and calls[0][0].endswith("uv") and "--upgrade-package" in calls[0]
+    assert (tmp_path / ".updated").exists()
+    assert not (tmp_path / ".updating").exists()  # 更新が終わったらロックは消える

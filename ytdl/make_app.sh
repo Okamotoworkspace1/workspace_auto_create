@@ -9,7 +9,6 @@ set -e
 HERE="$(cd "$(dirname "$0")" && pwd)"
 NAME="YouTubeダウンローダー"
 BUNDLE_ID="local.youtube-downloader"
-export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 
 if [ -z "$DEST" ]; then
   if [ -w /Applications ]; then DEST=/Applications; else DEST="$HOME/Applications"; fi
@@ -58,11 +57,15 @@ cat > "$APP/Contents/Info.plist" <<EOF
 </plist>
 EOF
 
-# アイコン（Python・sips・iconutil のどれかが無ければ、標準のアイコンのまま）
-PY=""
-for c in /opt/homebrew/bin/python3 /usr/local/bin/python3; do [ -x "$c" ] && PY="$c" && break; done
-[ -z "$PY" ] && xcode-select -p >/dev/null 2>&1 && PY=/usr/bin/python3
-if [ -n "$PY" ] && command -v sips >/dev/null && command -v iconutil >/dev/null; then
+# 必要な部品（Python・yt-dlp・ffmpeg）をここで入れておく。進み具合をターミナルに出せるので、
+# アプリの初回起動で黙って待たせるより分かりやすい
+echo
+echo "必要な部品を準備しています（初回は数分かかります）…"
+"$APP/Contents/Resources/launcher.sh" --prepare
+
+# アイコン（sips・iconutil が無ければ、標準のアイコンのまま）
+PY="$HOME/Library/Application Support/YouTubeDownloader/venv/bin/python"
+if [ -x "$PY" ] && command -v sips >/dev/null && command -v iconutil >/dev/null; then
   TMP="$(mktemp -d)"
   ICONSET="$TMP/AppIcon.iconset"
   mkdir "$ICONSET"

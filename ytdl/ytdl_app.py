@@ -37,14 +37,6 @@ import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-try:
-    import yt_dlp
-except ImportError:  # pragma: no cover - 起動スクリプトが入れるはずだが念のため
-    sys.exit(
-        "yt-dlp が見つかりません。次のコマンドで入れてください:\n"
-        '  python3 -m pip install -U "yt-dlp[default,deno]"'
-    )
-
 IS_MAC = sys.platform == "darwin"
 IS_WIN = sys.platform == "win32"
 DEFAULT_DIR = Path.home() / "Downloads" / "YouTube"
@@ -65,6 +57,101 @@ MAX_BODY = 256 * 1024
 HISTORY_LIMIT = 100
 BYE_GRACE = 5  # タブを閉じてから終了するまでの猶予（再読み込みと区別するため）
 IDLE_TIMEOUT = 30 * 60  # 画面から一度も問い合わせが無いまま、この秒数たったら終了
+UPDATE_INTERVAL = 24 * 3600  # yt-dlp を最新にする間隔
+PACKAGES = ["yt-dlp[default,deno]"]  # Mac は launcher.sh が imageio-ffmpeg も入れる
+
+
+def redirect_output_if_windowless() -> None:
+    """pythonw（窓なし）で起動されたときは出力先が無いので、ログファイルに書く。"""
+    if sys.stdout is not None and sys.stderr is not None:
+        return
+    log = SUPPORT_DIR / "app.log"
+    try:
+        log.parent.mkdir(parents=True, exist_ok=True)
+        if log.exists() and log.stat().st_size > 1_000_000:
+            log.unlink()
+        f = open(log, "a", encoding="utf-8", buffering=1)  # noqa: SIM115 - 終了まで開いたまま
+    except OSError:
+        return
+    sys.stdout = sys.stderr = f
+
+
+def update_ytdlp() -> None:
+    """yt-dlp を 1 日 1 回、最新にする（YouTube の仕様変更に合わせて頻繁に直るため）。
+
+    yt-dlp を読み込む前（このファイルの import より前）に呼ぶこと。動いている最中に
+    入れ替えると、古い部品と新しい部品が混ざって失敗するおそれがある。
+    Mac は launcher.sh が入れた uv で（速い）、Windows は pip で更新する。
+    """
+    stamp = SUPPORT_DIR / ".updated"
+    try:
+        if time.time() - stamp.stat().st_mtime < UPDATE_INTERVAL:
+            return
+    except OSError:
+        pass
+    # すでに起動中なら、そちらが部品を使っているので触らない
+    try:
+        port = json.loads((SUPPORT_DIR / "server.json").read_text(encoding="utf-8"))["port"]
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/ping", timeout=1):
+            return
+    except Exception:  # noqa: BLE001 - 起動していなければ例外になる
+        pass
+    # 同時に 2 つ起動されたとき、更新が重ならないようにする
+    lock = SUPPORT_DIR / ".updating"
+    try:
+        SUPPORT_DIR.mkdir(parents=True, exist_ok=True)
+        os.close(os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY))
+    except FileExistsError:
+        started = time.time()
+        while lock.exists() and time.time() - started < 300:  # 相手の更新が終わるまで待つ
+            time.sleep(0.5)
+        if lock.exists():  # 前回の異常終了で残ったもの
+            lock.unlink(missing_ok=True)
+        return
+    except OSError:
+        return
+    try:
+        _run_update(stamp)
+    finally:
+        lock.unlink(missing_ok=True)
+
+
+def _run_update(stamp: Path) -> None:
+    uv = SUPPORT_DIR / "bin" / ("uv.exe" if IS_WIN else "uv")
+    exe = Path(sys.executable)
+    if exe.name.lower() == "pythonw.exe" and (exe.parent / "python.exe").exists():
+        exe = exe.parent / "python.exe"
+    if uv.exists():
+        # yt-dlp 本体だけ上げる（deno などは yt-dlp が新しい版を求めたときだけ上がる）
+        cmd = [str(uv), "pip", "install", "--quiet", "--python", str(exe), "--upgrade-package", "yt-dlp", *PACKAGES]
+    else:
+        # pip の -U は既定で依存先を必要なときしか上げないので、大きな deno を毎回落とさない
+        cmd = [str(exe), "-m", "pip", "install", "-q", "-U", "--disable-pip-version-check",
+               "--no-warn-script-location", *PACKAGES]
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=300, creationflags=NO_WINDOW)
+    except (OSError, subprocess.TimeoutExpired) as e:
+        print(f"yt-dlp の更新に失敗しました: {e}")
+        return
+    if res.returncode == 0:
+        stamp.touch()
+    else:
+        # 失敗しても入っている版で動かす（オフラインのときなど）
+        print(f"yt-dlp の更新に失敗しました:\n{res.stderr[-2000:]}")
+
+
+if __name__ == "__main__":
+    redirect_output_if_windowless()
+    if "--auto-update" in sys.argv[1:]:
+        update_ytdlp()
+
+try:
+    import yt_dlp
+except ImportError:  # pragma: no cover - インストーラーが入れるはずだが念のため
+    sys.exit(
+        "yt-dlp が見つかりません。次のコマンドで入れてください:\n"
+        '  python3 -m pip install -U "yt-dlp[default,deno]"'
+    )
 
 # QuickTime / 写真アプリで再生できるよう H.264 (avc1) + AAC (m4a) を優先する。
 # YouTube の高画質版は VP9 / AV1 のことが多く、そのまま mp4 に入れると Mac 標準の
@@ -844,52 +931,6 @@ def make_handler(app: App):
     return Handler
 
 
-def redirect_output_if_windowless() -> None:
-    """pythonw（窓なし）で起動されたときは出力先が無いので、ログファイルに書く。"""
-    if sys.stdout is not None and sys.stderr is not None:
-        return
-    log = SUPPORT_DIR / "app.log"
-    try:
-        log.parent.mkdir(parents=True, exist_ok=True)
-        if log.exists() and log.stat().st_size > 1_000_000:
-            log.unlink()
-        f = open(log, "a", encoding="utf-8", buffering=1)  # noqa: SIM115 - 終了まで開いたまま
-    except OSError:
-        return
-    sys.stdout = sys.stderr = f
-
-
-def update_ytdlp_in_background() -> None:
-    """yt-dlp を 1 日 1 回、裏で最新にする（反映されるのは次に起動したとき）。
-
-    YouTube の仕様変更に合わせて頻繁に直るため。Mac では launcher.sh が同じことをする。
-    """
-    stamp = SUPPORT_DIR / ".updated"
-    try:
-        if time.time() - stamp.stat().st_mtime < 24 * 3600:
-            return
-    except OSError:
-        pass
-    exe = Path(sys.executable)
-    if exe.name.lower() == "pythonw.exe" and (exe.parent / "python.exe").exists():
-        exe = exe.parent / "python.exe"
-
-    def run() -> None:
-        cmd = [str(exe), "-m", "pip", "install", "-q", "-U", "--disable-pip-version-check",
-               "--no-warn-script-location", "yt-dlp[default,deno]"]
-        try:
-            res = subprocess.run(cmd, capture_output=True, text=True, timeout=600, creationflags=NO_WINDOW)
-        except (OSError, subprocess.TimeoutExpired) as e:
-            print(f"yt-dlp の更新に失敗しました: {e}")
-            return
-        if res.returncode == 0:
-            stamp.touch()
-        else:
-            print(f"yt-dlp の更新に失敗しました:\n{res.stderr[-2000:]}")
-
-    threading.Thread(target=run, daemon=True).start()
-
-
 def find_running() -> str | None:
     """すでに起動している画面があれば、その URL を返す。"""
     info = read_json(SUPPORT_DIR / "server.json", {})
@@ -1437,13 +1478,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("-o", "--output", type=Path, help=f"保存先（既定 {DEFAULT_DIR}）")
     p.add_argument("--port", type=int, default=0, help="画面モードのポート番号（既定: 自動）")
     p.add_argument("--no-browser", action="store_true", help="画面モードでブラウザを自動で開かない")
-    p.add_argument("--auto-update", action="store_true", help="起動時に yt-dlp を裏で最新にする（1 日 1 回）")
-    redirect_output_if_windowless()
+    p.add_argument("--auto-update", action="store_true",
+                   help="起動時に yt-dlp を最新にする（1 日 1 回。処理はファイル冒頭で済ませる）")
     args = p.parse_args(argv)
 
     if not args.url:
-        if args.auto_update and not find_running():
-            update_ytdlp_in_background()
         serve(args.output, args.port, not args.no_browser)
         return 0
 

@@ -49,18 +49,29 @@ powershell -ep bypass -c "irm https://raw.githubusercontent.com/Okamotoworkspace
 
 ## Mac の場合
 
-### はじめかた（最初の 1 回だけ）
+### インストール（最初の 1 回だけ・Homebrew もパスワードも不要）
 
-1. Finder で `ytdl` フォルダを開き、**`アプリを作る.command`** をダブルクリックします。
-   - 「開発元を確認できない」と表示されたら、ファイルを **右クリック（control + クリック）→「開く」** を選んでください。
-2. 「アプリケーション」フォルダに **YouTubeダウンローダー** ができて、そのまま起動します。
-3. 必要なソフト（Python・ffmpeg）が入っていなければ案内が出ます。「準備する」を押すと
-   ターミナルが開いて自動でインストールされます。終わったらアプリをもう一度開いてください。
-   - Homebrew も無い場合は一緒にインストールします。途中で Mac のログインパスワードを聞かれます。
-4. 初回だけ、部品のダウンロードに 1〜2 分かかります（通知が出ます）。
+1. **⌘ + スペース** で「ターミナル」と入力して開きます。
+2. 次の 1 行を貼り付けて Enter。
 
-これで準備完了です。以降は **Launchpad** や **Spotlight（⌘ + スペース →「YouTube」）** から開けます。
-Dock に置いておくとさらに便利です。
+```
+curl -fsSL https://raw.githubusercontent.com/Okamotoworkspace1/workspace_auto_create/claude/trusting-rubin-1kunv9/ytdl/mac/install.sh | bash
+```
+
+あとは待つだけです。Python・ffmpeg など必要なものがすべて自動で入り（約 200MB のダウンロード、数分）、
+「アプリケーション」フォルダに **YouTubeダウンローダー** ができて、そのまま起動します。
+以降は **Launchpad** や **Spotlight（⌘ + スペース →「YouTube」）** から開けます。Dock に置いておくとさらに便利です。
+
+<details>
+<summary>ZIP をダウンロードして入れる方法</summary>
+
+リポジトリを ZIP でダウンロードして展開し、ターミナルに `bash ` と入力してから
+`ytdl/アプリを作る.command` をウィンドウにドラッグして Enter を押します。
+
+</details>
+
+- 必要なものはすべて `~/Library/Application Support/YouTubeDownloader` に入ります。Mac に入っている Python などとはぶつかりません。
+- **更新**：同じ 1 行をもう一度実行すると最新版になります。ダウンロード部品（yt-dlp）は 1 日 1 回、起動時に自動で更新されます。
 
 ### 使い方
 
@@ -118,7 +129,7 @@ cd ytdl
 
 ## 更新・削除（Mac）
 
-- **更新**：このフォルダの `ytdl_app.py` を新しくしたら、`アプリを作る.command` をもう一度実行してください。
+- **更新**：インストールの 1 行をもう一度実行してください。
   なお、ダウンロード部品（yt-dlp）はアプリが 1 日 1 回自動で最新にします。
 - **削除**：「アプリケーション」の YouTubeダウンローダー と、
   `~/Library/Application Support/YouTubeDownloader`（設定・履歴・部品）をゴミ箱へ。
@@ -129,7 +140,8 @@ cd ytdl
 | ファイル | 役割 |
 |---|---|
 | `ytdl_app.py` | 本体。画面（Python 標準ライブラリだけのローカルサーバー）とダウンロード処理 |
-| `launcher.sh` | 起動前の準備。Python・ffmpeg の確認、専用環境の作成、yt-dlp の自動更新 |
+| `launcher.sh` | Mac の起動前の準備。uv で専用の Python を用意し、yt-dlp・ffmpeg を入れる |
+| `mac/install.sh` | Mac 用の 1 行インストーラー。必要なファイルを取ってきて `make_app.sh` を実行する |
 | `make_app.sh` / `アプリを作る.command` | `.app` を組み立てて「アプリケーション」に置く |
 | `make_icon.py` | アプリのアイコンを描く（Mac 用 PNG と Windows 用 `windows/icon.ico`） |
 | `windows/install.ps1` / `windows/インストール.bat` | Windows 用インストーラー。埋め込み版 Python・yt-dlp・ffmpeg を入れ、ショートカットを作る |
