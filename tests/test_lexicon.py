@@ -113,3 +113,18 @@ def test_substituted_readings_are_not_flagged_again():
     """辞書が入れたカタカナ読みが、新たな誤読候補として出てこないこと。"""
     lex = Lexicon([Entry("ピート・マラビッチ", "ピートマラビッチ")])
     assert find_risky_terms("ピート・マラビッチの話。", lex) == []
+
+
+def test_generic_loanwords_are_not_flagged():
+    """単位や一般的な外来語で検出を埋め尽くさない。
+
+    誤読チェックは人が目で見るものなので、ノイズが多いと使われなくなる。
+    """
+    text = "標高1609メートル、酸素は17パーセント少ない。ホームとアウェーの差。"
+    assert [r.term for r in find_risky_terms(text) if r.kind == "katakana"] == []
+
+
+def test_real_proper_nouns_still_surface():
+    risks = [r.term for r in find_risky_terms("デンバー・ナゲッツの本拠地、ボール・アリーナ。")]
+    assert "デンバー・ナゲッツ" in risks
+    assert "ボール・アリーナ" in risks
