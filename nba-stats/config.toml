@@ -20,8 +20,8 @@
 # CSV に season が "Career" の行があれば、計算せずにその値をそのまま通算行に使います。
 
 [site]
-title = "NBA Stats Reference"
-subtitle = "限定公開・NBA選手スタッツ"
+title = "オタバス"
+subtitle = "NBA選手スタッツ データ室"
 # true: 検索エンジンに載せない（meta robots と robots.txt を出力）
 noindex = true
 # 複数チームに所属したシーズンの「合計行」として扱うチームコード
