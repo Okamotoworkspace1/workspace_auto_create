@@ -125,6 +125,26 @@ bbb01,2024-25,BBB,40,20.0,4.0,8.0,.500,10.0
         build.build(self.data, self.out, CONFIG)
 
 
+class SingleFileTest(unittest.TestCase):
+    setUp = BuildTest.setUp
+
+    def test_single_file(self):
+        import json
+        out = build.build_single(self.data, self.tmp / "one.html", CONFIG)
+        text = out.read_text(encoding="utf-8")
+        self.assertTrue(text.startswith("<title>"))
+        self.assertNotIn("<html", text)  # Artifact 側が骨組みを付ける
+        self.assertIn('name="robots" content="noindex', text)
+        payload = text[text.index("window.NBA_DATA = ") + 18:text.index(";</script>")]
+        data = json.loads(payload)
+        totals = next(t for t in data["tables"] if t["id"] == "totals")
+        g = [c[0] for c in totals["cols"]].index("g")
+        self.assertEqual(totals["career"]["bbb01"][g], 60)  # 2TM 行だけを数える
+        per_game = next(t for t in data["tables"] if t["id"] == "per_game")
+        self.assertEqual(per_game["career"]["aaa01"][-1], "99.9")  # CSV の Career 行
+        self.assertEqual(data["leaders"]["season"], "2024-25")
+
+
 class SampleDataTest(unittest.TestCase):
     def test_sample_builds_and_career_per_game_matches_totals(self):
         sample = ROOT / "sample_data"

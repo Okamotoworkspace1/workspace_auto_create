@@ -594,36 +594,48 @@ def build_team_pages(p: Pages) -> None:
     p.write("teams/index.html", "Teams", f"<h1>Teams</h1>{''.join(blocks)}", "teams")
 
 
+def compute_leaders(site: Site):
+    """最新シーズンのリーダーボード。(season, table, min_games, [(Column, 上位行)])"""
+    cfg = site.config.get("home", {})
+    seasons = site.seasons
+    table = next((t for t in site.tables if t.id == cfg.get("leaders_table", "per_game")), None)
+    if not table or not seasons:
+        return "", None, 0, []
+    latest = seasons[0]
+    rows = counted_rows(site, [r for r in table.rows if r["season"] == latest])
+    min_g = cfg.get("leaders_min_games", 0)
+    if min_g:
+        rows = [r for r in rows if (to_num(r.get("g")) or 0) >= min_g]
+    cols = {c.key: c for c in table.columns}
+    boards = []
+    for key in cfg.get("leaders", []):
+        if key not in cols:
+            continue
+        ranked = sorted((r for r in rows if to_num(r.get(key)) is not None), key=lambda r: -to_num(r[key]))
+        ranked = ranked[: cfg.get("leaders_count", 5)]
+        if ranked:
+            boards.append((cols[key], ranked))
+    return latest, table, min_g, boards
+
+
 def build_home(p: Pages) -> None:
     site = p.site
-    cfg = site.config.get("home", {})
     root = ""
     seasons = site.seasons
     title = site.config.get("site", {}).get("title", "NBA Stats")
     subtitle = site.config.get("site", {}).get("subtitle", "")
 
     leaders_html = ""
-    table = next((t for t in site.tables if t.id == cfg.get("leaders_table", "per_game")), None)
-    if table and seasons:
-        latest = seasons[0]
-        rows = counted_rows(site, [r for r in table.rows if r["season"] == latest])
-        min_g = cfg.get("leaders_min_games", 0)
-        rows = [r for r in rows if (to_num(r.get("g")) or 0) >= min_g] if min_g else rows
-        cols = {c.key: c for c in table.columns}
+    latest, table, min_g, boards = compute_leaders(site)
+    if boards:
         cards = []
-        for key in cfg.get("leaders", []):
-            if key not in cols:
-                continue
-            ranked = sorted((r for r in rows if to_num(r.get(key)) is not None), key=lambda r: -to_num(r[key]))
-            ranked = ranked[: cfg.get("leaders_count", 5)]
-            if not ranked:
-                continue
+        for col, ranked in boards:
             lis = "".join(
                 f'<li><span class="who">{p.player_link(r["player_id"], root)} <span class="muted">{esc(r["team"])}</span></span>'
-                f'<span class="val">{esc(fmt(r[key], cols[key].fmt))}</span></li>'
+                f'<span class="val">{esc(fmt(r[col.key], col.fmt))}</span></li>'
                 for r in ranked
             )
-            cards.append(f'<div class="card"><h3>{esc(cols[key].label)}</h3><ol>{lis}</ol></div>')
+            cards.append(f'<div class="card"><h3>{esc(col.label)}</h3><ol>{lis}</ol></div>')
         if cards:
             note = f"（{min_g}試合以上）" if min_g else ""
             leaders_html = f"""
@@ -669,6 +681,95 @@ def build_search_index(site: Site, out: Path) -> None:
     (out / "assets" / "search-index.js").write_text(text, encoding="utf-8")
 
 
+def export_data(site: Site) -> dict:
+    """1 ファイル版（spa.js）が読むデータ。通算行・リーダーボードは計算済みで渡す。"""
+    cfg = site.config.get("site", {})
+    bio_spec = site.config.get("bio", [])
+    players = {}
+    for pid, info in site.players.items():
+        players[pid] = {
+            "n": info.get("name") or pid,
+            "l": last_name_key(info),
+            "b": [[b["label"], info[b["key"]]] for b in bio_spec if info.get(b["key"])],
+        }
+    teams = {
+        code: {k: v for k, v in (("n", t.get("name", "")), ("c", t.get("conference", "")), ("d", t.get("division", ""))) if v}
+        for code, t in site.teams.items()
+    }
+
+    def career_values(table: Table, pid: str, row) -> list:
+        if pid in table.career_rows:
+            return [row.get(c.key, "") for c in table.columns]  # CSV の Career 行をそのまま
+        return [None if row.get(c.key) is None else round(row[c.key], 6) for c in table.columns]
+
+    tables = []
+    for t in site.tables:
+        by_player: dict[str, list] = defaultdict(list)
+        for r in t.rows:
+            by_player[r["player_id"]].append(r)
+        career = {}
+        for pid, rows in by_player.items():
+            row = career_row(site, t, pid, rows)
+            if row:
+                career[pid] = career_values(t, pid, row)
+        tables.append({
+            "id": t.id,
+            "title": t.title,
+            "cols": [[c.key, c.label, c.fmt] for c in t.columns],
+            "rows": [[r["player_id"], r["season"], r["team"], *(r.get(c.key, "") for c in t.columns)] for r in t.rows],
+            "career": career,
+        })
+
+    latest, table, min_g, boards = compute_leaders(site)
+    return {
+        "title": cfg.get("title", "NBA Stats"),
+        "subtitle": cfg.get("subtitle", ""),
+        "built": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "totalCodes": sorted(site.total_codes),
+        "players": players,
+        "teams": teams,
+        "tables": tables,
+        "leaders": {
+            "season": latest,
+            "table": table.title if table else "",
+            "minG": min_g,
+            "boards": [
+                {"label": col.label, "fmt": col.fmt, "rows": [[r["player_id"], r["team"], r[col.key]] for r in ranked]}
+                for col, ranked in boards
+            ],
+        },
+    }
+
+
+def build_single(data_dir: Path, out_file: Path, config_path: Path) -> Path:
+    """データ・CSS・JS をすべて埋め込んだ 1 枚の HTML を出力する。
+
+    claude.ai の Artifact など「1 ファイルを置くだけ」のホスティング向け。
+    <html>/<head>/<body> は付けない（Artifact 側がページの骨組みを付けるため）。
+    """
+    site = load_site(data_dir, config_path)
+    data = export_data(site)
+    # </script> を含む値でスクリプトが途切れないようにする
+    payload = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    css = (HERE / "static" / "style.css").read_text(encoding="utf-8")
+    js = (HERE / "static" / "spa.js").read_text(encoding="utf-8")
+    robots = '<meta name="robots" content="noindex, nofollow, noarchive">\n' if site.config.get("site", {}).get("noindex", True) else ""
+    doc = f"""<title>{esc(data["title"])}</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+{robots}<style>
+{css}
+</style>
+<div id="app"></div>
+<script>window.NBA_DATA = {payload};</script>
+<script>
+{js}
+</script>
+"""
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+    out_file.write_text(doc, encoding="utf-8")
+    return out_file
+
+
 def build(data_dir: Path, out: Path, config_path: Path) -> Pages:
     site = load_site(data_dir, config_path)
     marker = out / ".nba-stats-build"
@@ -700,12 +801,18 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--data", type=Path, default=None, help="CSV のあるディレクトリ（既定: data/、無ければ sample_data/）")
     ap.add_argument("--out", type=Path, default=HERE / "dist", help="出力先")
     ap.add_argument("--config", type=Path, default=HERE / "config.toml")
+    ap.add_argument("--single", type=Path, metavar="FILE",
+                    help="全ページを 1 枚の HTML にまとめて FILE に出力（Artifact 等に置く用）")
     args = ap.parse_args(argv)
     if args.data is None:
         args.data = HERE / "data"
         if not args.data.exists():
             args.data = HERE / "sample_data"
             print("[info] data/ が無いので sample_data/（架空のサンプル）でビルドします", file=sys.stderr)
+    if args.single:
+        path = build_single(args.data, args.single, args.config)
+        print(f"{path} を出力しました（{path.stat().st_size / 1024:.0f} KB）")
+        return 0
     p = build(args.data, args.out, args.config)
     print(f"{p.count} ページを {args.out} に出力しました")
     return 0

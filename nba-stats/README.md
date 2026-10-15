@@ -35,6 +35,16 @@ python build.py       # → dist/ に出力
 
 オプション: `python build.py --data 別のフォルダ --out 出力先 --config 設定ファイル`
 
+## 1 ファイル版（URL だけで開ける形）
+
+```bash
+python build.py --single site.html
+```
+
+データ・CSS・JS をすべて埋め込んだ **HTML 1 枚**を出力します。ページ切り替えは `#` 付き URL で行うので、
+選手ページなどにも直接リンクできます（例: `…#p~smithjo01`、`…#s~2024-25`、`…#t~LAL~2024-25`）。
+claude.ai の Artifact として公開しているのはこの形式です。データを更新したら、これを作り直して同じ Artifact に再公開します。
+
 ## データ形式（CSV）
 
 `data/` に以下を置きます。UTF-8（Excel の BOM 付きも可）、1 行目がヘッダー。
