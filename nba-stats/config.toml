@@ -1,0 +1,156 @@
+# NBA Stats サイトの設定
+#
+# 表示する表・列・表示形式・通算（Career）行の計算方法をここで定義します。
+# CSV に列が増えたら、ここに 1 行足すだけで表示されます（コード変更は不要）。
+#
+# 列の書式 fmt:
+#   int  … 整数（例: 72）
+#   f1   … 小数1桁（例: 27.3）
+#   f3   … 小数3桁（例: 0.215）
+#   pct  … 率（例: .512 / 1.000、basketball-reference と同じ先頭0なし表記）
+#   text … 文字列そのまま
+#
+# 通算行の集計方法 agg（未指定なら通算行は空欄）:
+#   sum            … 合計（トータル系）
+#   wavg           … 表の weight 列（例: 試合数 g）で加重平均
+#   wavg:mp        … 指定した列で加重平均（例: 出場時間で加重した PER）
+#   ratio:fg/fga   … 合計(fg) ÷ 合計(fga)（weight があれば weight を掛けてから合計）
+#   max            … 最大値
+#
+# CSV に season が "Career" の行があれば、計算せずにその値をそのまま通算行に使います。
+
+[site]
+title = "NBA Stats Reference"
+subtitle = "限定公開・NBA選手スタッツ"
+# true: 検索エンジンに載せない（meta robots と robots.txt を出力）
+noindex = true
+# 複数チームに所属したシーズンの「合計行」として扱うチームコード
+total_team_codes = ["TOT", "2TM", "3TM", "4TM", "5TM"]
+
+[home]
+# トップページのリーダーボード（最新シーズン）
+leaders_table = "per_game"
+leaders = ["pts", "trb", "ast", "stl", "blk", "fg3"]
+leaders_count = 5
+# この試合数未満の選手はリーダーボードから除外
+leaders_min_games = 20
+
+# 選手ページ上部のプロフィール欄（players.csv の列）
+[[bio]]
+key = "pos"
+label = "Position"
+[[bio]]
+key = "shoots"
+label = "Shoots"
+[[bio]]
+key = "height"
+label = "Height"
+[[bio]]
+key = "weight"
+label = "Weight"
+[[bio]]
+key = "birth_date"
+label = "Born"
+[[bio]]
+key = "birth_place"
+label = "Birthplace"
+[[bio]]
+key = "college"
+label = "College"
+[[bio]]
+key = "draft"
+label = "Draft"
+
+# ---------------------------------------------------------------------------
+# スタッツ表。data/ 以下の CSV 1 ファイル = 1 表。
+# 全 CSV 共通の必須列: player_id, season, team
+# ファイルが存在しない表はスキップされます。
+# ---------------------------------------------------------------------------
+
+[[tables]]
+id = "per_game"
+title = "Per Game"
+file = "per_game.csv"
+weight = "g"
+columns = [
+  { key = "age",     label = "Age",  fmt = "int" },
+  { key = "pos",     label = "Pos",  fmt = "text" },
+  { key = "g",       label = "G",    fmt = "int", agg = "sum" },
+  { key = "gs",      label = "GS",   fmt = "int", agg = "sum" },
+  { key = "mp",      label = "MP",   fmt = "f1",  agg = "wavg" },
+  { key = "fg",      label = "FG",   fmt = "f1",  agg = "wavg" },
+  { key = "fga",     label = "FGA",  fmt = "f1",  agg = "wavg" },
+  { key = "fg_pct",  label = "FG%",  fmt = "pct", agg = "ratio:fg/fga" },
+  { key = "fg3",     label = "3P",   fmt = "f1",  agg = "wavg" },
+  { key = "fg3a",    label = "3PA",  fmt = "f1",  agg = "wavg" },
+  { key = "fg3_pct", label = "3P%",  fmt = "pct", agg = "ratio:fg3/fg3a" },
+  { key = "fg2",     label = "2P",   fmt = "f1",  agg = "wavg" },
+  { key = "fg2a",    label = "2PA",  fmt = "f1",  agg = "wavg" },
+  { key = "fg2_pct", label = "2P%",  fmt = "pct", agg = "ratio:fg2/fg2a" },
+  { key = "efg_pct", label = "eFG%", fmt = "pct" },
+  { key = "ft",      label = "FT",   fmt = "f1",  agg = "wavg" },
+  { key = "fta",     label = "FTA",  fmt = "f1",  agg = "wavg" },
+  { key = "ft_pct",  label = "FT%",  fmt = "pct", agg = "ratio:ft/fta" },
+  { key = "orb",     label = "ORB",  fmt = "f1",  agg = "wavg" },
+  { key = "drb",     label = "DRB",  fmt = "f1",  agg = "wavg" },
+  { key = "trb",     label = "TRB",  fmt = "f1",  agg = "wavg" },
+  { key = "ast",     label = "AST",  fmt = "f1",  agg = "wavg" },
+  { key = "stl",     label = "STL",  fmt = "f1",  agg = "wavg" },
+  { key = "blk",     label = "BLK",  fmt = "f1",  agg = "wavg" },
+  { key = "tov",     label = "TOV",  fmt = "f1",  agg = "wavg" },
+  { key = "pf",      label = "PF",   fmt = "f1",  agg = "wavg" },
+  { key = "pts",     label = "PTS",  fmt = "f1",  agg = "wavg" },
+]
+
+[[tables]]
+id = "totals"
+title = "Totals"
+file = "totals.csv"
+columns = [
+  { key = "age",     label = "Age",  fmt = "int" },
+  { key = "pos",     label = "Pos",  fmt = "text" },
+  { key = "g",       label = "G",    fmt = "int", agg = "sum" },
+  { key = "gs",      label = "GS",   fmt = "int", agg = "sum" },
+  { key = "mp",      label = "MP",   fmt = "int", agg = "sum" },
+  { key = "fg",      label = "FG",   fmt = "int", agg = "sum" },
+  { key = "fga",     label = "FGA",  fmt = "int", agg = "sum" },
+  { key = "fg_pct",  label = "FG%",  fmt = "pct", agg = "ratio:fg/fga" },
+  { key = "fg3",     label = "3P",   fmt = "int", agg = "sum" },
+  { key = "fg3a",    label = "3PA",  fmt = "int", agg = "sum" },
+  { key = "fg3_pct", label = "3P%",  fmt = "pct", agg = "ratio:fg3/fg3a" },
+  { key = "ft",      label = "FT",   fmt = "int", agg = "sum" },
+  { key = "fta",     label = "FTA",  fmt = "int", agg = "sum" },
+  { key = "ft_pct",  label = "FT%",  fmt = "pct", agg = "ratio:ft/fta" },
+  { key = "orb",     label = "ORB",  fmt = "int", agg = "sum" },
+  { key = "drb",     label = "DRB",  fmt = "int", agg = "sum" },
+  { key = "trb",     label = "TRB",  fmt = "int", agg = "sum" },
+  { key = "ast",     label = "AST",  fmt = "int", agg = "sum" },
+  { key = "stl",     label = "STL",  fmt = "int", agg = "sum" },
+  { key = "blk",     label = "BLK",  fmt = "int", agg = "sum" },
+  { key = "tov",     label = "TOV",  fmt = "int", agg = "sum" },
+  { key = "pf",      label = "PF",   fmt = "int", agg = "sum" },
+  { key = "pts",     label = "PTS",  fmt = "int", agg = "sum" },
+]
+
+[[tables]]
+id = "advanced"
+title = "Advanced"
+file = "advanced.csv"
+columns = [
+  { key = "age",     label = "Age",   fmt = "int" },
+  { key = "g",       label = "G",     fmt = "int", agg = "sum" },
+  { key = "mp",      label = "MP",    fmt = "int", agg = "sum" },
+  { key = "per",     label = "PER",   fmt = "f1",  agg = "wavg:mp" },
+  { key = "ts_pct",  label = "TS%",   fmt = "pct", agg = "wavg:mp" },
+  { key = "fg3a_rate", label = "3PAr", fmt = "pct", agg = "wavg:mp" },
+  { key = "fta_rate",  label = "FTr",  fmt = "pct", agg = "wavg:mp" },
+  { key = "usg_pct", label = "USG%",  fmt = "f1",  agg = "wavg:mp" },
+  { key = "ows",     label = "OWS",   fmt = "f1",  agg = "sum" },
+  { key = "dws",     label = "DWS",   fmt = "f1",  agg = "sum" },
+  { key = "ws",      label = "WS",    fmt = "f1",  agg = "sum" },
+  { key = "ws_48",   label = "WS/48", fmt = "f3",  agg = "wavg:mp" },
+  { key = "obpm",    label = "OBPM",  fmt = "f1",  agg = "wavg:mp" },
+  { key = "dbpm",    label = "DBPM",  fmt = "f1",  agg = "wavg:mp" },
+  { key = "bpm",     label = "BPM",   fmt = "f1",  agg = "wavg:mp" },
+  { key = "vorp",    label = "VORP",  fmt = "f1",  agg = "sum" },
+]

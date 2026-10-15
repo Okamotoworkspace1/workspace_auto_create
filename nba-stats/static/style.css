@@ -1,0 +1,142 @@
+:root {
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --muted: #6a737d;
+  --line: #d8dde3;
+  --head: #f2f4f7;
+  --zebra: #f8f9fb;
+  --hover: #fff6d6;
+  --accent: #c8102e;
+  --link: #0b5cad;
+  --brand-bg: #1d2a3a;
+  --brand-fg: #ffffff;
+  --card: #ffffff;
+  --foot: #eef1f5;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14181d;
+    --fg: #e6e8eb;
+    --muted: #98a1ab;
+    --line: #2d343c;
+    --head: #1d232a;
+    --zebra: #181d23;
+    --hover: #2e2a1a;
+    --accent: #ff5a6e;
+    --link: #6cb2ff;
+    --brand-bg: #0d1116;
+    --card: #1a1f25;
+    --foot: #20262e;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+}
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1 { font-size: 1.7rem; margin: .4em 0 .2em; }
+h2 { font-size: 1.2rem; margin: 1.4em 0 .5em; border-bottom: 2px solid var(--accent); padding-bottom: .2em; }
+h3 { font-size: 1rem; margin: 0 0 .4em; }
+.muted { color: var(--muted); font-weight: normal; }
+.small { font-size: .8em; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+
+/* header */
+.site-header { background: var(--brand-bg); color: var(--brand-fg); }
+.header-inner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding-top: 10px; padding-bottom: 10px; }
+.brand { color: var(--brand-fg); font-weight: 700; font-size: 1.15rem; }
+.nav { display: flex; gap: 14px; }
+.nav a { color: #c9d3de; }
+.nav a.active, .nav a:hover { color: #fff; }
+.search { position: relative; margin-left: auto; flex: 0 1 280px; min-width: 180px; }
+.search input { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #3a4a5c; background: #fff; color: #111; font-size: 14px; }
+.search-results {
+  position: absolute; z-index: 10; top: 100%; left: 0; right: 0; margin: 4px 0 0; padding: 4px 0;
+  list-style: none; background: var(--card); border: 1px solid var(--line); border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.18); max-height: 60vh; overflow-y: auto;
+}
+.search-results li a { display: flex; justify-content: space-between; gap: 8px; padding: 6px 10px; color: var(--fg); }
+.search-results li a:hover, .search-results li.sel a { background: var(--hover); text-decoration: none; }
+.search-results .y { color: var(--muted); font-size: .85em; white-space: nowrap; }
+
+main { padding-bottom: 40px; }
+.breadcrumbs { margin-top: 14px; font-size: .9em; color: var(--muted); }
+.site-footer { border-top: 1px solid var(--line); color: var(--muted); font-size: .85em; padding: 14px 0; }
+
+/* player profile */
+.profile { margin-bottom: 8px; }
+.bio { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 4px 20px; margin: 10px 0; }
+.bio div { display: flex; gap: 8px; }
+.bio dt { font-weight: 600; min-width: 80px; }
+.bio dd { margin: 0; }
+.teams { margin: 6px 0; }
+
+/* tabs */
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 18px; border-bottom: 1px solid var(--line); }
+.tab {
+  border: 1px solid var(--line); border-bottom: none; background: var(--head); color: var(--fg);
+  padding: 6px 14px; border-radius: 6px 6px 0 0; cursor: pointer; font: inherit;
+}
+.tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.panel h2 { display: none; }
+.panel { margin-top: 10px; }
+
+/* stats table */
+.table-scroll { overflow-x: auto; max-width: 100%; border: 1px solid var(--line); }
+table.stats { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.stats.narrow { width: auto; min-width: 280px; }
+table.stats th, table.stats td { padding: 4px 8px; border-bottom: 1px solid var(--line); }
+table.stats thead th {
+  position: sticky; top: 0; z-index: 2; background: var(--head); font-weight: 600; cursor: pointer; user-select: none;
+  border-bottom: 2px solid var(--line);
+}
+table.stats thead th:hover { color: var(--accent); }
+table.stats thead th.asc::after { content: " ▲"; font-size: .7em; }
+table.stats thead th.desc::after { content: " ▼"; font-size: .7em; }
+table.stats .num { text-align: right; }
+table.stats .text, table.stats .lead { text-align: left; }
+table.stats tbody th { font-weight: normal; }
+table.stats tbody tr:nth-child(even) { background: var(--zebra); }
+table.stats tbody tr:hover { background: var(--hover); }
+table.stats tbody tr.partial { color: var(--muted); }
+table.stats tbody tr.partial a { color: inherit; }
+table.stats tfoot td, table.stats tfoot th { background: var(--foot); font-weight: 700; border-top: 2px solid var(--fg); }
+/* 選手名／シーズン列を横スクロール時に固定 */
+table.stats .sticky { position: sticky; left: 0; z-index: 1; background: var(--bg); box-shadow: 1px 0 0 var(--line); }
+table.stats thead .sticky { z-index: 3; background: var(--head); }
+table.stats tbody tr:nth-child(even) .sticky { background: var(--zebra); }
+table.stats tbody tr:hover .sticky { background: var(--hover); }
+table.stats tfoot .sticky { background: var(--foot); }
+table.stats tbody tr.hidden { display: none; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; margin: 10px 0; font-size: .9em; }
+.filters input[type=number] { width: 70px; padding: 3px 6px; }
+.pager { margin: 0; }
+
+/* home */
+.hero { padding: 18px 0 4px; }
+.stats-count { color: var(--muted); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.card { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; background: var(--card); }
+.card ol { margin: 0; padding-left: 1.4em; }
+.card li { padding: 2px 0; }
+.card li::marker { color: var(--muted); }
+.card li { display: list-item; }
+.card .who { display: inline-block; max-width: calc(100% - 50px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+.card .val { float: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+ul.cols { columns: 4 220px; padding-left: 1.2em; margin: 0; }
+ul.cols li { break-inside: avoid; padding: 1px 0; }
+.jump { font-size: 1.05em; word-spacing: 6px; }
+
+@media (max-width: 640px) {
+  h1 { font-size: 1.35rem; }
+  .search { flex-basis: 100%; margin-left: 0; }
+}

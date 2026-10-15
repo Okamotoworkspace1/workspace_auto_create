@@ -1,0 +1,49 @@
+player_id,name,pos,shoots,height,weight,birth_date,birth_place,college,draft
+sketcty00,Tyrese Sketch,PF,Right,6-8,250lb,1997-06-22,USA,Example University,2nd round
+protoke01,Kenta Prototype,PF,Right,6-8,212lb,1994-10-15,USA,,2nd round
+demoan02,Andre Demo,SF,Right,6-4,237lb,1997-01-05,Canada,Example University,2nd round
+speciis03,Isaiah Specimen Jr.,SF,Right,7-11,238lb,1999-02-05,France,Placeholder Tech,1st round
+testwlu04,Luka Testwell,PF,Left,6-0,222lb,1996-03-24,France,,Undrafted
+fixtuty05,Tyrese Fixture,SG,Right,6-6,215lb,2001-01-02,Australia,,1st round
+sketcis06,Isaiah Sketch,SG,Left,6-3,186lb,1999-12-26,Canada,Placeholder Tech,Undrafted
+protoda07,Darius Prototype,C,Right,6-8,240lb,2003-12-07,Japan,Placeholder Tech,2nd round
+protoma08,Marcus Prototype,SG,Right,7-5,239lb,1993-02-22,Japan,Sample State,Undrafted
+mocklni09,Nikola Mockley,PG,Right,7-7,200lb,1996-07-24,USA,Sample State,2nd round
+dummyma10,Malik Dummy,PF,Right,7-7,231lb,1999-11-24,Japan,Example University,2nd round
+draftma11,Malik Draftson,SG,Right,7-11,204lb,2000-06-13,Canada,,Undrafted
+testwca12,Caleb Testwell,PG,Right,6-8,206lb,1999-06-02,Australia,Example University,2nd round
+protoma13,Malik Prototype,SG,Right,7-5,190lb,2000-08-12,Serbia,,1st round
+fixtuth14,Théo Fixture Jr.,C,Right,6-9,196lb,2001-12-15,USA,,1st round
+specith15,Théo Specimen,SF,Left,7-9,242lb,1999-05-03,USA,,Undrafted
+specijo16,Jordan Specimen,PG,Right,7-11,233lb,1997-04-07,USA,Placeholder Tech,2nd round
+placema17,Marcus Placeholder,C,Right,6-4,243lb,1999-11-16,USA,Example University,1st round
+dummyda18,Damian Dummy,SF,Right,7-7,233lb,1999-02-09,France,,Undrafted
+exampma19,Mateo Example,SG,Right,6-1,258lb,1994-09-19,USA,Placeholder Tech,1st round
+outlimi20,Miles Outline,PG,Right,6-4,224lb,2002-04-21,USA,Example University,2nd round
+placeke21,Kevin Placeholder,SF,Right,7-4,183lb,2001-05-03,Serbia,Sample State,1st round
+stubbke22,Kenta Stubbs,PG,Right,6-8,183lb,2000-07-01,Canada,Placeholder Tech,2nd round
+testwmi23,Miles Testwell,SF,Right,7-8,241lb,2003-11-19,Japan,Sample State,2nd round
+mocklca24,Caleb Mockley,SG,Right,6-3,204lb,2006-08-08,Australia,Sample State,Undrafted
+outlima25,Mateo Outline Jr.,PG,Right,6-11,238lb,2004-09-15,Australia,,2nd round
+mocklty26,Tyrese Mockley,PG,Left,6-0,183lb,1995-09-13,Canada,,Undrafted
+specima27,Mateo Specimen,SG,Right,7-7,221lb,2000-07-04,USA,Placeholder Tech,1st round
+dummyca28,Cameron Dummy,C,Left,7-0,190lb,2000-11-12,France,Sample State,1st round
+draftth29,Théo Draftson,SG,Right,6-8,243lb,2004-07-08,USA,Example University,2nd round
+testwel30,Elijah Testwell,PG,Right,7-2,195lb,2001-07-13,Canada,Sample State,2nd round
+protomi31,Miles Prototype,C,Right,6-0,218lb,1997-03-28,Serbia,Sample State,1st round
+fixtulu32,Luka Fixture,C,Right,6-2,187lb,2000-08-17,Japan,Example University,Undrafted
+demomi33,Miles Demo,SF,Left,7-6,229lb,1998-04-11,Canada,,2nd round
+demoxa34,Xavier Demo,SF,Left,7-3,221lb,2001-03-16,Japan,,1st round
+testwma35,Marcus Testwell,PG,Right,6-8,206lb,2001-06-22,USA,Example University,2nd round
+draftma36,Marcus Draftson Jr.,C,Right,7-0,202lb,2002-09-09,Australia,Placeholder Tech,2nd round
+samplda37,Darius Sample,SG,Right,7-6,227lb,2000-01-08,Japan,,1st round
+outlima38,Marcus Outline,C,Right,7-4,226lb,1992-04-15,USA,,2nd round
+stubbma39,Marcus Stubbs,PF,Right,6-0,238lb,2006-09-17,France,Example University,Undrafted
+outlida40,Damian Outline,SG,Right,7-6,191lb,2005-03-17,USA,,Undrafted
+dummyan41,Andre Dummy,SF,Left,7-11,227lb,1994-12-10,USA,Sample State,Undrafted
+templno42,Noah Template,PG,Right,7-7,248lb,1999-10-26,USA,,1st round
+fixtutr43,Trey Fixture,SF,Right,7-3,243lb,1995-03-24,Australia,Example University,Undrafted
+specino44,Noah Specimen,PG,Left,7-8,223lb,1997-01-25,Canada,,2nd round
+exampty45,Tyrese Example,SF,Right,6-2,246lb,1997-07-22,USA,Example University,2nd round
+sketcma46,Mateo Sketch,PF,Right,6-9,189lb,2002-04-17,Serbia,Placeholder Tech,2nd round
+fakemda47,Damian Fakeman Jr.,SF,Right,7-0,196lb,2001-11-27,Australia,Sample State,1st round

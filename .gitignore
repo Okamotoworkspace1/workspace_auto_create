@@ -14,3 +14,6 @@ out/
 
 # 収録原稿のダウンロードキャッシュ
 examples/recording/.corpus/
+
+# nba-stats: 本番データはリポジトリ（public）に含めない
+nba-stats/data/
