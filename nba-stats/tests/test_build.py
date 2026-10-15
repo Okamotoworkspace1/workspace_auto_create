@@ -145,6 +145,22 @@ class SingleFileTest(unittest.TestCase):
         self.assertEqual(data["leaders"]["season"], "2024-25")
 
 
+class PagesTest(unittest.TestCase):
+    setUp = BuildTest.setUp
+
+    def test_pages_folder(self):
+        out = build.build_pages(self.data, self.tmp / "pages", CONFIG)
+        html = (out / "index.html").read_text(encoding="utf-8")
+        self.assertTrue(html.startswith("<!doctype html>"))
+        self.assertIn('<meta name="robots" content="noindex', html)
+        self.assertNotIn("claude:viewport-fit-sides", html)
+        self.assertEqual(html.count("<body>"), 1)
+        self.assertIn('<div id="app"></div>', html)
+        self.assertIn("X-Robots-Tag: noindex", (out / "_headers").read_text(encoding="utf-8"))
+        self.assertTrue((out / "robots.txt").exists())
+        build.build_pages(self.data, out, CONFIG)  # 再出力できる
+
+
 class SampleDataTest(unittest.TestCase):
     def test_sample_builds_and_career_per_game_matches_totals(self):
         sample = ROOT / "sample_data"

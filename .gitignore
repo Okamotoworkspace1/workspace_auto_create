@@ -17,3 +17,6 @@ examples/recording/.corpus/
 
 # nba-stats: 本番データはリポジトリ（public）に含めない
 nba-stats/data/
+
+# Cloudflare Pages 用の出力
+nba-stats/pages/

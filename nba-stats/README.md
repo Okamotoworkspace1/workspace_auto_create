@@ -45,6 +45,20 @@ python build.py --single site.html
 選手ページなどにも直接リンクできます（例: `…#p~smithjo01`、`…#s~2024-25`、`…#t~LAL~2024-25`）。
 claude.ai の Artifact として公開しているのはこの形式です。データを更新したら、これを作り直して同じ Artifact に再公開します。
 
+## Cloudflare Pages に置く（`名前.pages.dev` で公開）
+
+```bash
+python build.py --pages pages
+```
+
+`pages/` に `index.html`・`robots.txt`・`_headers`（検索除外の HTTP ヘッダー）ができます。
+
+1. Cloudflare ダッシュボード →「Workers & Pages」→「Create application」→ Pages の「Get started」→「Drag and drop your files」
+2. プロジェクト名を入力（これが URL になる: `https://プロジェクト名.pages.dev`）
+3. `pages/` フォルダ（またはその中身を zip にしたもの）をドラッグ＆ドロップ →「Deploy site」
+
+データを更新したら、`python build.py --pages pages` で作り直し、同じプロジェクトの「Create deployment」から再アップロードします（URL は変わりません）。
+
 ## データ形式（CSV）
 
 `data/` に以下を置きます。UTF-8（Excel の BOM 付きも可）、1 行目がヘッダー。
