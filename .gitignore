@@ -20,3 +20,7 @@ nba-stats/data/
 
 # Cloudflare Pages 用の出力
 nba-stats/pages/
+
+# オタバス: データ・ロゴと出力はリポジトリ（public）に含めない
+otabasu/data/
+otabasu/pages/
